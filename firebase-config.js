@@ -19,12 +19,12 @@ import {
 
 // ── GANTI DENGAN CONFIG FIREBASE PROYEKMU ─────────────────
 const firebaseConfig = {
-  apiKey:            "GANTI_API_KEY",
-  authDomain:        "GANTI_PROJECT_ID.firebaseapp.com",
-  projectId:         "GANTI_PROJECT_ID",
-  storageBucket:     "GANTI_PROJECT_ID.appspot.com",
-  messagingSenderId: "GANTI_MESSAGING_SENDER_ID",
-  appId:             "GANTI_APP_ID"
+  apiKey:            "AIzaSyCdUaFZQu0ef3gaARFpvZCG9rcVybYDxPE",
+  authDomain:        "kedaikita-2cfb5.firebaseapp.com",
+  projectId:         "kedaikita-2cfb5",
+  storageBucket:     "kedaikita-2cfb5.firebasestorage.app",
+  messagingSenderId: "456322875536",
+  appId:             "1:456322875536:web:631b0ba65a381eefc0d815"
 };
 
 // ── INIT ───────────────────────────────────────────────────
@@ -139,7 +139,7 @@ function renderNavbar(showAdmin=false) {
   <nav class="navbar">
     <a href="index.html" class="nav-brand">
       <div class="brand-mark">🍽️</div>
-      Warung<em>Kita</em>
+      Kedai<em>Kita</em>
     </a>
     <ul class="nav-links mob" id="navlinks">
       <li><a href="index.html">🏠 Menu</a></li>
