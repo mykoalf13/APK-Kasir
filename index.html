@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>WarungKita — Menu</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="nav"></div>
+<main class="page"><div class="container">
+
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Pesan Makanan<br>Favoritmu 🔥</h1>
+      <p>Menu segar pilihan terbaik, siap dihidangkan hangat untuk Anda setiap hari.</p>
+    </div>
+    <div class="hero-emoji">🍽️</div>
+  </div>
+
+  <div class="filter-row">
+    <button class="ftab active" onclick="setCat(this,'Semua')">Semua</button>
+    <button class="ftab" onclick="setCat(this,'Makanan')">🍛 Makanan</button>
+    <button class="ftab" onclick="setCat(this,'Minuman')">🥤 Minuman</button>
+    <button class="ftab" onclick="setCat(this,'Snack')">🍿 Snack</button>
+    <div class="search-wrap" style="margin-left:auto">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="q" placeholder="Cari menu..." oninput="render()"/>
+    </div>
+  </div>
+
+  <div id="loading" style="text-align:center;padding:60px 20px;color:var(--dust)">
+    <div style="font-size:2.5rem;animation:spin 1s linear infinite;display:inline-block">⏳</div>
+    <div style="margin-top:10px">Memuat menu dari Firebase...</div>
+  </div>
+  <div class="menu-grid" id="grid" style="display:none"></div>
+  <div class="empty" id="empty" style="display:none">
+    <div class="ei">🍽️</div><h3>Menu tidak ditemukan</h3><p>Coba kata kunci lain</p>
+  </div>
+
+</div></main>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<script type="module">
+  import { fbSeedIfEmpty, fbListenMenu, getCart, saveCart, rp, updateBadge, toast, setActive, renderNavbar, onAuthStateChanged, auth } from './firebase-config.js';
+
+  let allMenu = [], activeCat = 'Semua';
+
+  onAuthStateChanged(auth, user => {
+    document.getElementById('nav').innerHTML = renderNavbar(!!user);
+    setActive(); updateBadge();
+  });
+
+  window.setCat = (btn, cat) => {
+    activeCat = cat;
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); render();
+  };
+  window.render = render;
+
+  window.addToCart = (id) => {
+    const item = allMenu.find(m=>m.id===id);
+    if (!item) return;
+    const cart = getCart();
+    const ex = cart.find(c=>c.id===id);
+    if (ex) ex.qty++; else cart.push({...item,qty:1});
+    saveCart(cart);
+    toast(`${item.nama} ditambahkan ke keranjang 🛒`);
+    const btn = document.querySelector(`[data-id="${id}"]`);
+    if (btn){btn.classList.add('pop');setTimeout(()=>btn.classList.remove('pop'),300);}
+  };
+
+  function render() {
+    const q = document.getElementById('q').value.toLowerCase();
+    document.getElementById('loading').style.display = 'none';
+    const filtered = allMenu.filter(m => {
+      const catOk = activeCat==='Semua'||m.kategori===activeCat;
+      const qOk   = m.nama.toLowerCase().includes(q)||m.kategori.toLowerCase().includes(q);
+      return catOk&&qOk;
+    });
+    const grid=document.getElementById('grid'), empty=document.getElementById('empty');
+    if (!filtered.length){grid.style.display='none';empty.style.display='block';return;}
+    empty.style.display='none'; grid.style.display='grid';
+    grid.innerHTML = filtered.map(m=>`
+      <div class="mcard" onclick="addToCart('${m.id}')">
+        <div class="mcard-img-wrap">
+          <img class="mcard-img" src="${m.img||''}" alt="${m.nama}"
+               onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80'"/>
+          <span class="mcard-cat">${m.kategori}</span>
+        </div>
+        <div class="mcard-body">
+          <div class="mcard-name">${m.nama}</div>
+          <div class="mcard-desc">${m.deskripsi||''}</div>
+          <div class="mcard-footer">
+            <div class="mcard-price">${rp(m.harga)}</div>
+            <button class="btn-add" data-id="${m.id}"
+              onclick="event.stopPropagation();addToCart('${m.id}')">+</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  await fbSeedIfEmpty();
+  fbListenMenu(menu => { allMenu=menu; render(); });
+</script>
+</body></html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>WarungKita — Keranjang</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="nav"></div>
+<main class="page"><div class="container">
+
+  <div class="section-hd">
+    <h2>Keranjang <span>Belanja</span></h2>
+    <a href="index.html" class="btn btn-outline btn-sm">← Tambah Menu</a>
+  </div>
+
+  <div class="cart-layout" id="cart-layout">
+    <div class="cart-list" id="cart-list"></div>
+    <div style="width:310px;flex-shrink:0">
+      <div class="summary">
+        <h3>📋 Ringkasan Pesanan</h3>
+        <div id="s-items"></div>
+        <hr class="s-divider">
+        <div class="s-row"><span class="lbl">Subtotal</span><span class="val" id="s-sub">Rp 0</span></div>
+        <div class="s-row"><span class="lbl">Pajak (0%)</span><span class="val">Rp 0</span></div>
+        <hr class="s-divider">
+        <div class="s-total"><span class="lbl">Total Bayar</span><span class="val" id="s-total">Rp 0</span></div>
+        <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px">
+          <a href="payment.html" class="btn btn-terra btn-lg btn-full">💳 Lanjut Pembayaran</a>
+          <button class="btn btn-outline btn-sm btn-full" onclick="clearAll()">🗑️ Kosongkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty" id="empty" style="display:none">
+    <div class="ei">🛒</div><h3>Keranjang Masih Kosong</h3><p>Tambahkan menu terlebih dahulu!</p>
+    <a href="index.html" class="btn btn-terra" style="margin-top:20px;display:inline-flex">🍽️ Lihat Menu</a>
+  </div>
+
+</div></main>
+<script type="module">
+  import { getCart, saveCart, rp, updateBadge, toast, setActive, renderNavbar, onAuthStateChanged, auth } from './firebase-config.js';
+
+  onAuthStateChanged(auth, user => {
+    document.getElementById('nav').innerHTML = renderNavbar(!!user);
+    setActive(); updateBadge();
+  });
+
+  window.chg = (id, d) => {
+    const cart = getCart(), it = cart.find(c => c.id === id);
+    if (!it) return;
+    it.qty += d;
+    if (it.qty <= 0) cart.splice(cart.indexOf(it), 1);
+    saveCart(cart); render();
+  };
+  window.rm = (id) => { saveCart(getCart().filter(c => c.id !== id)); toast('Item dihapus', 'error'); render(); };
+  window.clearAll = () => {
+    if (!confirm('Yakin kosongkan keranjang?')) return;
+    saveCart([]); toast('Keranjang dikosongkan', 'error'); render();
+  };
+
+  function render() {
+    const cart = getCart();
+    const layout = document.getElementById('cart-layout'), empty = document.getElementById('empty');
+    if (!cart.length) { layout.style.display = 'none'; empty.style.display = 'block'; return; }
+    layout.style.display = 'flex'; empty.style.display = 'none';
+
+    document.getElementById('cart-list').innerHTML = cart.map(it => `
+      <div class="cart-item">
+        <img class="cart-img" src="${it.img||''}" alt="${it.nama}"
+             onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&q=80'"/>
+        <div class="cart-info">
+          <div class="cart-name">${it.nama}</div>
+          <div class="cart-unit">${rp(it.harga)}</div>
+        </div>
+        <div class="qty-box">
+          <button class="qty-btn" onclick="chg('${it.id}',-1)">−</button>
+          <span class="qty-val">${it.qty}</span>
+          <button class="qty-btn" onclick="chg('${it.id}',1)">+</button>
+        </div>
+        <div class="cart-total">${rp(it.harga * it.qty)}</div>
+        <button class="btn-ghost" onclick="rm('${it.id}')">🗑️</button>
+      </div>`).join('');
+
+    document.getElementById('s-items').innerHTML = cart.map(it => `
+      <div class="s-row" style="font-size:.8rem">
+        <span class="lbl">${it.nama} ×${it.qty}</span>
+        <span class="val">${rp(it.harga * it.qty)}</span>
+      </div>`).join('');
+
+    const total = cart.reduce((s, i) => s + i.harga * i.qty, 0);
+    document.getElementById('s-sub').textContent = rp(total);
+    document.getElementById('s-total').textContent = rp(total);
+  }
+
+  render();
+</script>
+</body></html>

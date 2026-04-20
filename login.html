@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>WarungKita — Login</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">🍽️</div>
+    <div class="login-title">WarungKita</div>
+    <div class="login-sub" style="margin-bottom:28px">Masuk ke panel kasir & admin</div>
+
+    <div class="err-box" id="err" style="display:none"></div>
+
+    <div class="form-grp">
+      <label class="form-lbl">Email</label>
+      <input type="email" class="form-inp" id="email" placeholder="contoh@email.com" autocomplete="email"/>
+    </div>
+
+    <div class="form-grp" style="margin-bottom:8px">
+      <label class="form-lbl">Password</label>
+      <div style="position:relative">
+        <input type="password" class="form-inp" id="pass" placeholder="Masukkan password..."
+               autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <button onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mist);cursor:pointer;font-size:1rem">👁️</button>
+      </div>
+    </div>
+
+    <div style="background:var(--cream);border:1px solid var(--sand);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:22px;font-size:.8rem;color:var(--dust)">
+      💡 Gunakan email & password yang sudah didaftarkan di <strong style="color:var(--terracotta)">Firebase Authentication</strong>.<br>
+      Lihat <strong>SETUP.md</strong> untuk cara buat akun.
+    </div>
+
+    <button class="btn btn-terra btn-lg btn-full" id="btn-login" onclick="doLogin()">🔑 Masuk</button>
+    <div style="text-align:center;margin-top:18px">
+      <a href="index.html" style="color:var(--dust);font-size:.85rem;text-decoration:none">← Kembali ke menu</a>
+    </div>
+  </div>
+</div>
+<div id="toast-wrap" class="toast-wrap"></div>
+
+<script type="module">
+  import { fbLogin, auth, toast, onAuthStateChanged } from './firebase-config.js';
+
+  onAuthStateChanged(auth, user => { if (user) window.location.href='admin.html'; });
+
+  window.doLogin = async () => {
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('pass').value;
+    const err   = document.getElementById('err');
+    const btn   = document.getElementById('btn-login');
+
+    if (!email||!pass) { err.textContent='Email dan password wajib diisi.'; err.style.display='block'; return; }
+
+    btn.textContent='⏳ Memproses...'; btn.disabled=true; err.style.display='none';
+
+    try {
+      await fbLogin(email, pass);
+      toast('Login berhasil! Mengalihkan...','success');
+      setTimeout(()=>window.location.href='admin.html', 800);
+    } catch(e) {
+      const msgs = {
+        'auth/user-not-found':    'Email tidak terdaftar.',
+        'auth/wrong-password':    'Password salah.',
+        'auth/invalid-email':     'Format email tidak valid.',
+        'auth/too-many-requests': 'Terlalu banyak percobaan. Coba lagi nanti.',
+        'auth/invalid-credential':'Email atau password salah.',
+      };
+      err.textContent = msgs[e.code]||('Login gagal: '+e.message);
+      err.style.display='block';
+    } finally {
+      btn.textContent='🔑 Masuk'; btn.disabled=false;
+    }
+  };
+
+  window.togglePw = () => {
+    const el=document.getElementById('pass');
+    el.type=el.type==='password'?'text':'password';
+  };
+</script>
+</body></html>

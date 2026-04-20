@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>WarungKita — Pembayaran</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="nav"></div>
+<main class="page"><div class="container" style="max-width:860px">
+
+  <div class="section-hd">
+    <h2>Proses <span>Pembayaran</span></h2>
+    <a href="cart.html" class="btn btn-outline btn-sm">← Kembali</a>
+  </div>
+
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+
+    <!-- Left -->
+    <div style="flex:1;min-width:270px;display:flex;flex-direction:column;gap:18px">
+
+      <div style="background:var(--white);border:1px solid rgba(196,168,130,.2);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm)">
+        <div class="form-grp" style="margin-bottom:0">
+          <label class="form-lbl">👤 Nama Pelanggan (opsional)</label>
+          <input type="text" class="form-inp" id="cust" placeholder="Masukkan nama pelanggan..."/>
+        </div>
+      </div>
+
+      <div style="background:var(--white);border:1px solid rgba(196,168,130,.2);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm)">
+        <div style="font-family:var(--font-display);font-weight:800;font-size:1rem;margin-bottom:16px">💳 Metode Pembayaran</div>
+        <div class="pay-opts">
+          <label class="pay-opt selected" id="opt-cash" onclick="selPay('cash')">
+            <input type="radio" name="pay" value="cash" checked>
+            <div class="pay-icon">💵</div>
+            <div class="pay-label"><div class="name">Tunai (Cash)</div><div class="desc">Bayar langsung di kasir</div></div>
+          </label>
+          <label class="pay-opt" id="opt-qris" onclick="selPay('qris')">
+            <input type="radio" name="pay" value="qris">
+            <div class="pay-icon">📱</div>
+            <div class="pay-label"><div class="name">QRIS</div><div class="desc">Scan QR dengan e-wallet apapun</div></div>
+          </label>
+        </div>
+
+        <div id="cash-sec">
+          <label class="form-lbl">Uang Diterima</label>
+          <input type="number" class="form-inp" id="cash-in" placeholder="Masukkan nominal uang..." oninput="calcChange()"/>
+          <div id="change-box" style="display:none;margin-top:12px;padding:12px 15px;background:rgba(61,139,94,.07);border:1px solid rgba(61,139,94,.25);border-radius:var(--radius-sm)">
+            <div style="font-size:.78rem;color:var(--dust)">Kembalian</div>
+            <div style="font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:var(--success)" id="change-val"></div>
+          </div>
+        </div>
+
+        <div id="qris-sec" style="display:none">
+          <div class="qr-box show">
+            <div class="qr-svg-wrap">
+              <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+                <rect width="180" height="180" fill="white"/>
+                <rect x="8" y="8" width="50" height="50" rx="4" fill="none" stroke="#1C1917" stroke-width="5"/>
+                <rect x="16" y="16" width="34" height="34" rx="2" fill="#1C1917"/>
+                <rect x="122" y="8" width="50" height="50" rx="4" fill="none" stroke="#1C1917" stroke-width="5"/>
+                <rect x="130" y="16" width="34" height="34" rx="2" fill="#1C1917"/>
+                <rect x="8" y="122" width="50" height="50" rx="4" fill="none" stroke="#1C1917" stroke-width="5"/>
+                <rect x="16" y="130" width="34" height="34" rx="2" fill="#1C1917"/>
+                <rect x="70" y="8" width="7" height="7" fill="#1C1917"/><rect x="81" y="8" width="7" height="7" fill="#1C1917"/>
+                <rect x="70" y="19" width="7" height="7" fill="#1C1917"/><rect x="92" y="19" width="7" height="7" fill="#1C1917"/>
+                <rect x="70" y="30" width="7" height="7" fill="#1C1917"/><rect x="81" y="30" width="7" height="7" fill="#1C1917"/>
+                <rect x="8" y="70" width="7" height="7" fill="#1C1917"/><rect x="19" y="70" width="7" height="7" fill="#1C1917"/>
+                <rect x="30" y="70" width="7" height="7" fill="#1C1917"/><rect x="41" y="70" width="7" height="7" fill="#1C1917"/>
+                <rect x="52" y="70" width="7" height="7" fill="#1C1917"/><rect x="63" y="70" width="7" height="7" fill="#1C1917"/>
+                <rect x="70" y="70" width="7" height="7" fill="#1C1917"/><rect x="92" y="70" width="7" height="7" fill="#1C1917"/>
+                <rect x="103" y="70" width="7" height="7" fill="#1C1917"/><rect x="125" y="70" width="7" height="7" fill="#1C1917"/>
+                <rect x="147" y="70" width="7" height="7" fill="#1C1917"/>
+                <rect x="8" y="81" width="7" height="7" fill="#1C1917"/><rect x="30" y="81" width="7" height="7" fill="#1C1917"/>
+                <rect x="63" y="81" width="7" height="7" fill="#1C1917"/><rect x="85" y="81" width="7" height="7" fill="#1C1917"/>
+                <rect x="107" y="81" width="7" height="7" fill="#1C1917"/><rect x="136" y="81" width="7" height="7" fill="#1C1917"/>
+                <rect x="70" y="125" width="7" height="7" fill="#1C1917"/><rect x="103" y="125" width="7" height="7" fill="#1C1917"/>
+                <rect x="70" y="136" width="7" height="7" fill="#1C1917"/><rect x="92" y="136" width="7" height="7" fill="#1C1917"/>
+                <rect x="115" y="136" width="7" height="7" fill="#1C1917"/><rect x="136" y="136" width="7" height="7" fill="#1C1917"/>
+                <rect x="70" y="147" width="7" height="7" fill="#1C1917"/><rect x="103" y="147" width="7" height="7" fill="#1C1917"/>
+                <rect x="125" y="147" width="7" height="7" fill="#1C1917"/><rect x="147" y="158" width="7" height="7" fill="#1C1917"/>
+                <rect x="80" y="80" width="20" height="20" rx="4" fill="#C8613A"/>
+                <text x="90" y="94" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">W</text>
+              </svg>
+            </div>
+            <div style="font-weight:700;font-size:.9rem;color:var(--charcoal);margin-bottom:4px">QRIS WarungKita</div>
+            <div class="qr-note">GoPay · OVO · DANA · ShopeePay · m-Banking</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Summary -->
+    <div style="width:290px;flex-shrink:0">
+      <div class="summary">
+        <h3>🧾 Detail Pesanan</h3>
+        <div id="pay-items"></div>
+        <hr class="s-divider">
+        <div class="s-total"><span class="lbl">Total</span><span class="val" id="pay-total">Rp 0</span></div>
+        <div style="margin-top:22px">
+          <button class="btn btn-success btn-lg btn-full" id="btn-pay" onclick="doPay()">✅ Konfirmasi Pembayaran</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div></main>
+
+<!-- Success Modal -->
+<div class="overlay" id="ok-modal">
+  <div class="modal">
+    <div class="success-box">
+      <div class="check-circle">✅</div>
+      <h2>Pembayaran Berhasil!</h2>
+      <p id="ok-desc">Terima kasih 🎉</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-terra" onclick="printReceipt()">🖨️ Cetak Struk</button>
+        <button class="btn btn-outline" onclick="done()">✓ Selesai</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="overlay" id="rcpt-modal">
+  <div class="modal" style="max-width:360px">
+    <button class="modal-x" onclick="closeModal('rcpt-modal')">×</button>
+    <div id="rcpt-body"></div>
+    <button class="btn btn-terra btn-full" style="margin-top:14px" onclick="window.print()">🖨️ Print</button>
+  </div>
+</div>
+<div id="print-area" style="display:none"></div>
+
+<script type="module">
+  import { fbSaveTrx, getCart, saveCart, rp, updateBadge, toast, openModal, closeModal, setActive, renderNavbar, onAuthStateChanged, auth } from './firebase-config.js';
+
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+
+  let payMethod = 'cash', lastCart = [];
+
+  onAuthStateChanged(auth, user => {
+    document.getElementById('nav').innerHTML = renderNavbar(!!user);
+    setActive(); updateBadge();
+  });
+
+  // Init summary
+  (() => {
+    const cart = getCart();
+    if (!cart.length) { window.location.href = 'cart.html'; return; }
+    const total = cart.reduce((s,i) => s+i.harga*i.qty, 0);
+    document.getElementById('pay-items').innerHTML = cart.map(it=>`
+      <div class="s-row" style="font-size:.8rem">
+        <span class="lbl">${it.nama} ×${it.qty}</span>
+        <span class="val">${rp(it.harga*it.qty)}</span>
+      </div>`).join('');
+    document.getElementById('pay-total').textContent = rp(total);
+  })();
+
+  window.selPay = (m) => {
+    payMethod = m;
+    document.querySelectorAll('.pay-opt').forEach(el=>el.classList.remove('selected'));
+    document.getElementById(`opt-${m}`).classList.add('selected');
+    document.getElementById('cash-sec').style.display = m==='cash'?'block':'none';
+    document.getElementById('qris-sec').style.display = m==='qris'?'block':'none';
+  };
+
+  window.calcChange = () => {
+    const total = getCart().reduce((s,i)=>s+i.harga*i.qty,0);
+    const paid  = parseInt(document.getElementById('cash-in').value)||0;
+    const box   = document.getElementById('change-box');
+    if (paid>=total&&paid>0) { box.style.display='block'; document.getElementById('change-val').textContent=rp(paid-total); }
+    else box.style.display='none';
+  };
+
+  window.doPay = async () => {
+    const cart = getCart();
+    if (!cart.length) { toast('Keranjang kosong!','error'); return; }
+    const total = cart.reduce((s,i)=>s+i.harga*i.qty,0);
+
+    if (payMethod==='cash') {
+      const paid = parseInt(document.getElementById('cash-in').value)||0;
+      if (paid<total) { toast('Uang tidak cukup!','error'); return; }
+    }
+
+    const cust = document.getElementById('cust').value.trim()||'Pelanggan';
+    const btn  = document.getElementById('btn-pay');
+    btn.textContent='⏳ Menyimpan...'; btn.disabled=true;
+
+    try {
+      await fbSaveTrx({
+        customer: cust,
+        items: cart,
+        total,
+        payment: payMethod,
+        kembalian: payMethod==='cash' ? (parseInt(document.getElementById('cash-in').value)||0)-total : 0,
+        date: new Date().toISOString()
+      });
+      lastCart = [...cart];
+      document.getElementById('ok-desc').textContent = `Terima kasih, ${cust}! Total: ${rp(total)} 🎉`;
+      openModal('ok-modal');
+    } catch(e) {
+      toast('Gagal menyimpan transaksi: '+e.message, 'error');
+    } finally {
+      btn.textContent='✅ Konfirmasi Pembayaran'; btn.disabled=false;
+    }
+  };
+
+  window.printReceipt = () => {
+    const cart  = lastCart;
+    const total = cart.reduce((s,i)=>s+i.harga*i.qty,0);
+    const cust  = document.getElementById('cust').value.trim()||'Pelanggan';
+    const now   = new Date().toLocaleString('id-ID');
+    const id    = 'TRX-'+Date.now().toString().slice(-6);
+    const pm    = payMethod==='cash'?'Tunai':'QRIS';
+    const paid  = parseInt(document.getElementById('cash-in').value)||0;
+
+    const html = `
+      <div class="receipt">
+        <div class="r-logo">🍽️ WarungKita</div>
+        <div style="text-align:center;font-size:.7rem;color:#666">Jl. Kuliner No.1 — Tel: 021-000-0000</div>
+        <div class="r-hr"></div>
+        <div class="r-row"><span>No.</span><span>${id}</span></div>
+        <div class="r-row"><span>Tgl</span><span>${now}</span></div>
+        <div class="r-row"><span>Pelanggan</span><span>${cust}</span></div>
+        <div class="r-hr"></div>
+        ${cart.map(i=>`
+          <div class="r-row"><span>${i.nama}</span></div>
+          <div class="r-row" style="color:#666">
+            <span>  ${i.qty} × ${rp(i.harga)}</span><span>${rp(i.harga*i.qty)}</span>
+          </div>`).join('')}
+        <div class="r-hr"></div>
+        <div class="r-row r-bold"><span>TOTAL</span><span>${rp(total)}</span></div>
+        <div class="r-row" style="color:#666"><span>Bayar</span><span>${pm}</span></div>
+        ${payMethod==='cash'?`
+        <div class="r-row" style="color:#666"><span>Diterima</span><span>${rp(paid)}</span></div>
+        <div class="r-row r-bold" style="color:#3D8B5E"><span>Kembalian</span><span>${rp(paid-total)}</span></div>`:''}
+        <div class="r-hr"></div>
+        <div style="text-align:center;color:#888;font-size:.7rem">Terima kasih telah berkunjung! 😊</div>
+      </div>`;
+
+    document.getElementById('print-area').innerHTML = html;
+    document.getElementById('rcpt-body').innerHTML  = html;
+    closeModal('ok-modal');
+    openModal('rcpt-modal');
+  };
+
+  window.done = () => { saveCart([]); closeModal('ok-modal'); window.location.href='index.html'; };
+</script>
+</body></html>

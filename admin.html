@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>WarungKita — Admin</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="nav"></div>
+<main class="page"><div class="container">
+
+  <div class="section-hd">
+    <div>
+      <h2>Panel <span>Admin</span></h2>
+      <p style="color:var(--dust);font-size:.875rem;margin-top:4px" id="welcome">Memuat...</p>
+    </div>
+    <button class="btn btn-terra" onclick="openAdd()">+ Tambah Menu</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-c"><div class="stat-icon" style="background:rgba(200,97,58,.1)">🍽️</div><div class="stat-info"><div class="lbl">Total Menu</div><div class="val" id="st-all">—</div></div></div>
+    <div class="stat-c"><div class="stat-icon" style="background:rgba(200,97,58,.1)">🍛</div><div class="stat-info"><div class="lbl">Makanan</div><div class="val" id="st-food">—</div></div></div>
+    <div class="stat-c"><div class="stat-icon" style="background:rgba(59,114,192,.1)">🥤</div><div class="stat-info"><div class="lbl">Minuman</div><div class="val" id="st-drink">—</div></div></div>
+    <div class="stat-c"><div class="stat-icon" style="background:rgba(196,168,130,.2)">🍿</div><div class="stat-info"><div class="lbl">Snack</div><div class="val" id="st-snack">—</div></div></div>
+    <div class="stat-c"><div class="stat-icon" style="background:rgba(61,139,94,.1)">💰</div><div class="stat-info"><div class="lbl">Transaksi</div><div class="val" id="st-trx">—</div></div></div>
+  </div>
+
+  <!-- Trx summary -->
+  <div style="background:var(--white);border:1px solid rgba(196,168,130,.2);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:var(--shadow-sm)">
+    <div>
+      <div style="font-family:var(--font-display);font-weight:800;margin-bottom:2px">📊 Pendapatan Firebase</div>
+      <div style="font-size:.82rem;color:var(--dust)"><span id="trx-count">—</span> transaksi · Total: <strong style="color:var(--terracotta)" id="trx-total">—</strong></div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="loadTrx()">🔄 Refresh</button>
+  </div>
+
+  <!-- Table -->
+  <div style="background:var(--white);border:1px solid rgba(196,168,130,.2);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--sand);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div style="font-family:var(--font-display);font-weight:800">Daftar Menu — Realtime Firestore</div>
+      <div class="search-wrap" style="max-width:260px">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Cari menu..." oninput="filterTbl(this.value)"/>
+      </div>
+    </div>
+    <div id="tbl-loading" style="text-align:center;padding:40px;color:var(--mist)">⏳ Memuat dari Firestore...</div>
+    <div style="overflow-x:auto;display:none" id="tbl-wrap">
+      <table class="dtable">
+        <thead><tr><th>Menu</th><th>Kategori</th><th>Harga</th><th>Gambar</th><th>Aksi</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div></main>
+
+<!-- Form Modal -->
+<div class="overlay" id="form-modal">
+  <div class="modal" style="max-width:520px;max-height:90vh;overflow-y:auto">
+    <button class="modal-x" onclick="closeModal('form-modal')">×</button>
+    <div style="font-family:var(--font-display);font-weight:800;font-size:1.2rem;margin-bottom:24px" id="modal-ttl">➕ Tambah Menu</div>
+    <input type="hidden" id="f-id"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-grp" style="grid-column:1/-1">
+        <label class="form-lbl">Nama Menu *</label>
+        <input type="text" class="form-inp" id="f-nama" placeholder="Contoh: Nasi Goreng Spesial"/>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Kategori *</label>
+        <select class="form-sel" id="f-kat">
+          <option value="Makanan">Makanan</option>
+          <option value="Minuman">Minuman</option>
+          <option value="Snack">Snack</option>
+        </select>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Harga (Rp) *</label>
+        <input type="number" class="form-inp" id="f-harga" placeholder="25000" min="0"/>
+      </div>
+      <div class="form-grp" style="grid-column:1/-1">
+        <label class="form-lbl">URL Gambar (Unsplash atau lainnya)</label>
+        <input type="text" class="form-inp" id="f-img" placeholder="https://images.unsplash.com/photo-..." oninput="previewImg()"/>
+        <img id="img-prev" src="" style="width:100%;height:110px;object-fit:cover;border-radius:10px;display:none;margin-top:8px;border:1px solid var(--sand)"/>
+      </div>
+      <div class="form-grp" style="grid-column:1/-1;margin-bottom:0">
+        <label class="form-lbl">Deskripsi</label>
+        <textarea class="form-area" id="f-desc" placeholder="Deskripsi singkat menu..."></textarea>
+      </div>
+    </div>
+    <div style="margin-top:22px;display:flex;gap:10px">
+      <button class="btn btn-terra btn-full" id="btn-save" onclick="saveItem()">💾 Simpan ke Firebase</button>
+      <button class="btn btn-outline" onclick="closeModal('form-modal')" style="min-width:90px">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="overlay" id="del-modal">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <div style="font-size:3rem;margin-bottom:10px">🗑️</div>
+    <div style="font-family:var(--font-display);font-weight:800;font-size:1.1rem;margin-bottom:8px">Hapus dari Firestore?</div>
+    <p style="color:var(--dust);font-size:.875rem;margin-bottom:22px">
+      <strong id="del-name" style="color:var(--terracotta)"></strong> akan dihapus permanen.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-danger" id="btn-del" onclick="confirmDel()">🗑️ Hapus</button>
+      <button class="btn btn-outline" onclick="closeModal('del-modal')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    fbListenMenu, fbAddMenu, fbUpdateMenu, fbDeleteMenu,
+    fbGetTrx, requireFbAuth,
+    rp, toast, openModal, closeModal, setActive, renderNavbar,
+    updateBadge, onAuthStateChanged, auth
+  } from './firebase-config.js';
+
+  window.openModal  = openModal;
+  window.closeModal = closeModal;
+
+  let allMenu = [], delId = null, filterQ = '';
+
+  // Auth guard
+  const user = await requireFbAuth();
+  document.getElementById('nav').innerHTML = renderNavbar(true);
+  setActive(); updateBadge();
+  document.getElementById('welcome').textContent = `Masuk sebagai: ${user.email}`;
+
+  // Realtime menu listener
+  fbListenMenu(menu => {
+    allMenu = menu;
+    renderTbl();
+    updateStats();
+    document.getElementById('tbl-loading').style.display = 'none';
+    document.getElementById('tbl-wrap').style.display = 'block';
+  });
+
+  await loadTrx();
+
+  function updateStats() {
+    document.getElementById('st-all').textContent   = allMenu.length;
+    document.getElementById('st-food').textContent  = allMenu.filter(m=>m.kategori==='Makanan').length;
+    document.getElementById('st-drink').textContent = allMenu.filter(m=>m.kategori==='Minuman').length;
+    document.getElementById('st-snack').textContent = allMenu.filter(m=>m.kategori==='Snack').length;
+  }
+
+  async function loadTrx() {
+    try {
+      const trxs  = await fbGetTrx();
+      const total = trxs.reduce((s,t)=>s+(t.total||0),0);
+      document.getElementById('trx-count').textContent = trxs.length;
+      document.getElementById('trx-total').textContent = rp(total);
+      document.getElementById('st-trx').textContent    = trxs.length;
+    } catch(e) { document.getElementById('trx-count').textContent='?'; }
+  }
+  window.loadTrx = loadTrx;
+
+  window.filterTbl = q => { filterQ=q; renderTbl(); };
+
+  function renderTbl() {
+    const list = filterQ
+      ? allMenu.filter(m=>m.nama.toLowerCase().includes(filterQ.toLowerCase())||m.kategori.toLowerCase().includes(filterQ.toLowerCase()))
+      : allMenu;
+    const tb = document.getElementById('tbody');
+    if (!list.length) {
+      tb.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--mist)">Tidak ada menu</td></tr>`;
+      return;
+    }
+    tb.innerHTML = list.map(m=>`
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            <img src="${m.img||''}" style="width:50px;height:50px;border-radius:10px;object-fit:cover;background:var(--cream-dark);border:1px solid var(--sand);flex-shrink:0"
+                 onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&q=60'"/>
+            <div>
+              <div style="font-weight:600;color:var(--charcoal)">${m.nama}</div>
+              <div style="font-size:.73rem;color:var(--dust);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.deskripsi||''}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge ${m.kategori==='Makanan'?'b-food':m.kategori==='Minuman'?'b-drink':'b-snack'}">${m.kategori}</span></td>
+        <td style="font-family:var(--font-display);font-weight:800;color:var(--terracotta)">${rp(m.harga)}</td>
+        <td><a href="${m.img||'#'}" target="_blank" style="font-size:.75rem;color:var(--blue);text-decoration:none">🖼️ Lihat</a></td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm" onclick="editItem('${m.id}')">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="promptDel('${m.id}','${m.nama.replace(/'/g,"\\'")}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  window.previewImg = () => {
+    const val  = document.getElementById('f-img').value;
+    const prev = document.getElementById('img-prev');
+    if (val) { prev.src=val; prev.style.display='block'; } else prev.style.display='none';
+  };
+
+  window.openAdd = () => {
+    ['f-id','f-nama','f-harga','f-img','f-desc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-kat').value='Makanan';
+    document.getElementById('img-prev').style.display='none';
+    document.getElementById('modal-ttl').textContent='➕ Tambah Menu';
+    openModal('form-modal');
+  };
+
+  window.editItem = (id) => {
+    const m = allMenu.find(x=>x.id===id);
+    if (!m) return;
+    document.getElementById('f-id').value    = m.id;
+    document.getElementById('f-nama').value  = m.nama;
+    document.getElementById('f-kat').value   = m.kategori;
+    document.getElementById('f-harga').value = m.harga;
+    document.getElementById('f-img').value   = m.img||'';
+    document.getElementById('f-desc').value  = m.deskripsi||'';
+    const prev = document.getElementById('img-prev');
+    if (m.img){prev.src=m.img;prev.style.display='block';}else prev.style.display='none';
+    document.getElementById('modal-ttl').textContent='✏️ Edit Menu';
+    openModal('form-modal');
+  };
+
+  window.saveItem = async () => {
+    const nama  = document.getElementById('f-nama').value.trim();
+    const kat   = document.getElementById('f-kat').value;
+    const harga = parseInt(document.getElementById('f-harga').value);
+    const img   = document.getElementById('f-img').value.trim();
+    const desc  = document.getElementById('f-desc').value.trim();
+    const eid   = document.getElementById('f-id').value;
+
+    if (!nama)           { toast('Nama menu wajib diisi!','error'); return; }
+    if (!harga||harga<0) { toast('Harga tidak valid!','error'); return; }
+
+    const btn = document.getElementById('btn-save');
+    btn.textContent='⏳ Menyimpan...'; btn.disabled=true;
+
+    try {
+      if (eid) { await fbUpdateMenu(eid,{nama,kategori:kat,harga,img,deskripsi:desc}); toast('Menu diperbarui!','success'); }
+      else     { await fbAddMenu({nama,kategori:kat,harga,img,deskripsi:desc});        toast('Menu ditambahkan!','success'); }
+      closeModal('form-modal');
+    } catch(e) { toast('Gagal: '+e.message,'error'); }
+    finally    { btn.textContent='💾 Simpan ke Firebase'; btn.disabled=false; }
+  };
+
+  window.promptDel = (id, nama) => {
+    delId=id; document.getElementById('del-name').textContent=nama; openModal('del-modal');
+  };
+
+  window.confirmDel = async () => {
+    const btn=document.getElementById('btn-del');
+    btn.textContent='⏳...'; btn.disabled=true;
+    try { await fbDeleteMenu(delId); toast('Menu dihapus','error'); closeModal('del-modal'); }
+    catch(e) { toast('Gagal hapus: '+e.message,'error'); }
+    finally  { btn.textContent='🗑️ Hapus'; btn.disabled=false; }
+  };
+</script>
+</body></html>
