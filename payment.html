@@ -184,6 +184,7 @@ window.doPay = async () => {
       setTimeout(()=>window.location.href='login.html', 1200);
       return; 
     }
+   const total = cart.reduce((s,i)=>s+i.harga*i.qty,0);  
 
     if (payMethod==='cash') {
       const paid = parseInt(document.getElementById('cash-in').value)||0;
