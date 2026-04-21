@@ -173,10 +173,17 @@
     else box.style.display='none';
   };
 
-  window.doPay = async () => {
+window.doPay = async () => {
     const cart = getCart();
     if (!cart.length) { toast('Keranjang kosong!','error'); return; }
-    const total = cart.reduce((s,i)=>s+i.harga*i.qty,0);
+
+    // Cek login dulu
+    const user = auth.currentUser;
+    if (!user) { 
+      toast('Sesi habis, silakan login ulang!','error'); 
+      setTimeout(()=>window.location.href='login.html', 1200);
+      return; 
+    }
 
     if (payMethod==='cash') {
       const paid = parseInt(document.getElementById('cash-in').value)||0;
